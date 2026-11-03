@@ -1,0 +1,28 @@
+{
+ "ltl_vs_atoms": {
+  "trials": 10000,
+  "mismatches": 0
+ },
+ "ctl_vs_pymc": {
+  "trials": 5000,
+  "mismatches": 0
+ },
+ "ctl_limit_vs_Uk": {
+  "trials": 10000,
+  "mismatches": 0
+ },
+ "ltl_vs_pymc": {
+  "trials": 2000,
+  "mismatches": 189,
+  "by_G": {
+   "with_G": [
+    541,
+    140
+   ],
+   "without_G": [
+    1459,
+    49
+   ]
+  }
+ }
+}

@@ -2,23 +2,6 @@
 
 This directory replaces the experiment code of the submitted version. Everything
 in Section 6 of the revised paper is produced by the scripts here.
-
-## Why the code was rewritten
-
-* **LTL results of the submitted version were wrong.** The LTL procedure of
-  `pyModelChecking` 1.3.4 returns incorrect results, mostly for formulae
-  containing `G`. For example, `A G p` is reported false in a single `p`-labelled
-  state with a self-loop. On 2,000 random instances it disagreed with two
-  independent implementations in 189 cases (see `results/validation.json`). This
-  explains why ψ5 and ψ7 were 0 throughout in the old Fig. 3, and why one curve
-  converged to 1 in the multiple-initial-states panel, which contradicts
-  Theorem 4.3. The CTL procedure of `pyModelChecking` is correct.
-* **The formulae in the old code did not match Table 2.** `formulae.py` had no
-  `G a1` but did have `!a1 U F a2`.
-* **The sampler was not exact for K+.** When no initial state was drawn, the old
-  generator added a random one instead of conditioning on `I != {}`.
-* **Scale.** LTL was sampled only 50 or 10 times per n.
-
 ## Layout
 
 | file | content |

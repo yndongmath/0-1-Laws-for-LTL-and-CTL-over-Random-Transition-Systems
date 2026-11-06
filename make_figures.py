@@ -7,6 +7,7 @@ Writes PDF figures and a file `numbers.json` with all numbers quoted in the
 text, plus LaTeX table bodies (`tab_*.tex`).
 """
 import json
+import logging
 import os
 import sys
 
@@ -15,6 +16,10 @@ import matplotlib
 matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 import matplotlib.patches
+
+# Matplotlib subsets its bundled fonts with fontTools, which warns about their old
+# header timestamps when writing PDFs. The warning is harmless; silence it.
+logging.getLogger('fontTools').setLevel(logging.ERROR)
 from scipy.stats import spearmanr
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -118,6 +123,14 @@ def fit_rate(n, dev, se, nmin=None):
     return -coef[0], r2, int(m.sum())
 
 
+
+def upright_bb(texts):
+    """Matplotlib's \\mathbb is slanted; use the Unicode character U+1D542 instead,
+    so that the blackboard K is upright, as \\mathbb{K} in the paper."""
+    for t in texts:
+        t.set_text(t.get_text().replace(r'\mathbb{K}', '\U0001D542'))
+
+
 def clean_axes(ax):
     for s in ('top', 'right'):
         ax.spines[s].set_visible(False)
@@ -176,8 +189,9 @@ def fig_fixed(res, logic, names, fname, ncols):
                       label=r'one initial state, $\mathbb{K}^{1}_{n}$'),
                Line2D([], [], color=INK2, ls=(0, (3, 2)), lw=0.8, label='predicted limit'),
                Line2D([], [], color=INK2, ls=':', lw=0.6, label=r'$\varepsilon = 0.01$')]
-    fig.legend(handles=handles, loc='upper center', ncol=4, frameon=False,
-               bbox_to_anchor=(0.5, 1.0), handlelength=2.2, columnspacing=1.4)
+    leg = fig.legend(handles=handles, loc='upper center', ncol=4, frameon=False,
+                     bbox_to_anchor=(0.5, 1.0), handlelength=2.2, columnspacing=1.4)
+    upright_bb(leg.get_texts())
     fig.tight_layout(rect=(0, 0, 1, 1 - 0.32 / height), h_pad=0.35, w_pad=0.5)
     fig.savefig(os.path.join(OUT, fname))
     plt.close(fig)
@@ -213,7 +227,7 @@ def fig_random(res, fname, numbers):
         cnt = np.array([np.sum(np.isclose(c1[logics == lg], v)) for v in vals])
         frac = cnt / max((logics == lg).sum(), 1)
         ax.bar(vals + off, frac, width=width, color=col, label=lg, linewidth=0)
-    ax.set_xlabel(r'limit $\lim_n P(\mathbb{K}^{1}_{n} \models \varphi)$')
+    upright_bb([ax.set_xlabel(r'limit $\lim_n P(\mathbb{K}^{1}_{n} \models \varphi)$')])
     ax.set_ylabel('fraction of formulae')
     ax.set_xticks([0, 0.25, 0.5, 0.75, 1])
     ax.legend(frameon=False, loc='upper center')
@@ -236,7 +250,7 @@ def fig_random(res, fname, numbers):
         ax.set_ylim(1e-9, 1.5)
         ax.set_xlim(0, ns.max() * 1.02)
         ax.set_xlabel(r'number of states $n$')
-        ax.set_title(title, loc='left', fontsize=7, pad=2.5)
+        upright_bb([ax.set_title(title, loc='left', fontsize=7, pad=2.5)])
         clean_axes(ax)
     axes[2].tick_params(labelleft=False)
     from matplotlib.lines import Line2D
